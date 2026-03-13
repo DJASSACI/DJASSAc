@@ -1,0 +1,2303 @@
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.stripe.com;">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>Djassa CI - Vente d'Éléments Électroniques</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%), url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: #333;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .navbar h1 {
+            color: #4a5568;
+            margin: 0;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .mobile-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+        }
+        .mobile-menu.active {
+            display: block;
+        }
+        .mobile-menu a, .mobile-menu .user-actions {
+            display: block;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            text-decoration: none;
+            color: #667eea;
+        }
+        .mobile-menu .user-actions {
+            border-bottom: none;
+            padding: 10px 20px;
+        }
+        .mobile-menu .user-actions button {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .navbar h1::before {
+            content: "🛒";
+            font-size: 1.5em;
+            animation: float 3s ease-in-out infinite;
+        }
+        .navbar nav {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        .navbar a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        .navbar a:hover {
+            color: #764ba2;
+        }
+        .navbar .user-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .navbar .user-actions span {
+            color: #4a5568;
+            font-weight: bold;
+        }
+        .navbar .user-actions button {
+            padding: 8px 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .navbar .user-actions button:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+            transform: translateY(-1px);
+        }
+        .cart-btn {
+            position: relative;
+        }
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #e53e3e;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #667eea;
+        }
+        h1 {
+            color: #4a5568;
+            margin: 0;
+            font-size: 3em;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        .intro {
+            background: rgba(255, 255, 255, 0.6);
+            padding: 40px;
+            border-radius: 15px;
+            margin-bottom: 50px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            animation: slideUp 1s ease-out;
+        }
+        .section {
+            background: rgba(255, 255, 255, 0.6);
+            padding: 40px;
+            margin-bottom: 50px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            animation: fadeInUp 0.8s ease-out;
+        }
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+        h2 {
+            color: #2d3748;
+            margin-top: 0;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 15px;
+            font-size: 1.8em;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .article-card {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+        .article-card:hover {
+            transform: translateY(-5px);
+        }
+        .article-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .article-card .content {
+            padding: 15px;
+        }
+        .article-card h3 {
+            margin: 0 0 10px 0;
+            color: #2d3748;
+        }
+        .article-card p {
+            margin: 0 0 15px 0;
+            color: #666;
+        }
+        .article-card .price {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+        .article-card button {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .article-card button:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        }
+        input, label {
+            display: block;
+            margin: 15px 0;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            width: 100%;
+            max-width: 400px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin-top: 15px;
+        }
+        button:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .output {
+            margin-top: 30px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid #e2e8f0;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.8s ease-out;
+        }
+        .output h3 {
+            color: #2d3748;
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+        .output ul {
+            list-style: none;
+            padding: 0;
+        }
+        .output li {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+        .output li:hover {
+            background: #edf2f7;
+        }
+        .output img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 20px;
+        }
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 50px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes fadeInUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .page-section {
+            display: none;
+        }
+        .page-section.active {
+            display: block;
+        }
+        /* Slideshow Styles */
+        .slideshow-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: auto;
+            padding: 40px 20px;
+        }
+        .slide {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+        }
+        .slide:hover {
+            transform: translateY(-5px);
+        }
+        .slide img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            filter: brightness(0.7);
+        }
+        .slide .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+        }
+        .slide h2 {
+            font-size: 1.5em;
+            margin: 0 0 8px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .slide p {
+            font-size: 0.9em;
+            margin: 0;
+            opacity: 0.9;
+        }
+        .slide .cta-button {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+        .slide .cta-button:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .dots {
+            display: none;
+        }
+        @keyframes slideInUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        textarea {
+            display: block;
+            margin: 15px 0;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            width: 100%;
+            max-width: 400px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .cart-items {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .cart-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 15px;
+        }
+        .item-details {
+            flex: 1;
+        }
+        .item-details h4 {
+            margin: 0 0 5px 0;
+            color: #2d3748;
+        }
+        .item-details p {
+            margin: 0;
+            color: #666;
+        }
+        .item-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .item-actions button {
+            padding: 5px 10px;
+            background: #e2e8f0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .item-actions button:hover {
+            background: #cbd5e0;
+        }
+        .remove-btn {
+            background: #e53e3e !important;
+            color: white !important;
+        }
+        .remove-btn:hover {
+            background: #c53030 !important;
+        }
+        .cart-total {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .checkout-btn {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%) !important;
+            color: white !important;
+            font-size: 18px !important;
+            padding: 15px 30px !important;
+        }
+        .checkout-btn:hover {
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%) !important;
+        }
+        .profile-info {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .profile-info h4 {
+            margin-top: 0;
+            color: #2d3748;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .profile-info p {
+            margin: 10px 0;
+            color: #666;
+        }
+        .order-card {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .order-card h5 {
+            margin: 0 0 10px 0;
+            color: #2d3748;
+        }
+        .order-card p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .order-card details {
+            margin-top: 10px;
+        }
+        .order-card summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .order-card ul {
+            margin: 10px 0 0 20px;
+            padding: 0;
+        }
+        .order-card li {
+            margin: 5px 0;
+            color: #666;
+        }
+        .article-details {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .article-detail-card {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .article-detail-card img {
+            width: 300px;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .article-detail-card .content {
+            flex: 1;
+        }
+        .article-detail-card .content h2 {
+            margin-top: 0;
+            color: #2d3748;
+        }
+        .article-detail-card .description {
+            margin: 15px 0;
+            line-height: 1.6;
+            color: #666;
+        }
+        .back-btn {
+            background: #e2e8f0 !important;
+            color: #4a5568 !important;
+            margin-bottom: 20px;
+        }
+        .back-btn:hover {
+            background: #cbd5e0 !important;
+        }
+        .add-to-cart-btn {
+            margin-top: 20px;
+        }
+        select {
+            display: block;
+            margin: 15px 0;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        @media (max-width: 1400px) {
+            .container {
+                padding: 15px;
+                margin-top: 100px;
+            }
+            h1 {
+                font-size: 2.2em;
+            }
+            .section {
+                padding: 20px;
+            }
+            .navbar nav {
+                display: none;
+            }
+            .hamburger {
+                display: block;
+            }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .article-detail-card {
+                flex-direction: column;
+            }
+            .article-detail-card img {
+                width: 100%;
+                height: 250px;
+            }
+            .cart-item {
+                flex-direction: column;
+                text-align: center;
+            }
+            .cart-item img {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1>Djassa CI</h1>
+            <button class="hamburger" onclick="toggleMobileMenu()">☰</button>
+            <nav>
+                <a href="#accueil">Accueil</a>
+                <a href="#articles">Articles</a>
+                <a href="#boutiques">Boutiques</a>
+                <a href="#vendre">Vendre</a>
+                <a href="#contact">Contact</a>
+                <div class="user-actions">
+                    <span id="user-info"></span>
+                    <button id="login-btn" onclick="showSection('connexion')">Connexion</button>
+                    <button id="register-btn" onclick="showSection('inscription')">Inscription</button>
+                    <button id="logout-btn" onclick="deconnecter()" style="display: none;">Déconnexion</button>
+                    <button id="cart-btn" onclick="showSection('panier')" class="cart-btn" style="display: none;">
+                        Panier <span id="cart-count">0</span>
+                    </button>
+                    <button id="profile-btn" onclick="showSection('profil')" style="display: none;">Profil</button>
+                </div>
+            </nav>
+            <div class="mobile-menu">
+                <a href="#accueil">Accueil</a>
+                <a href="#articles">Articles</a>
+                <a href="#boutiques">Boutiques</a>
+                <a href="#vendre">Vendre</a>
+                <a href="#contact">Contact</a>
+                <div class="user-actions">
+                    <span id="user-info-mobile"></span>
+                    <button id="login-btn-mobile" onclick="showSection('connexion')">Connexion</button>
+                    <button id="register-btn-mobile" onclick="showSection('inscription')">Inscription</button>
+                    <button id="logout-btn-mobile" onclick="deconnecter()" style="display: none;">Déconnexion</button>
+                    <button id="cart-btn-mobile" onclick="showSection('panier')" class="cart-btn" style="display: none;">
+                        Panier <span id="cart-count-mobile">0</span>
+                    </button>
+                    <button id="profile-btn-mobile" onclick="showSection('profil')" style="display: none;">Profil</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <!-- Accueil Section -->
+        <div id="accueil" class="page-section active">
+            <header>
+                <h1>BIENVENUE À DJASSA CI</h1>
+            </header>
+            <div class="intro">
+                <h2 style="font-size: 2.5em; color: #667eea; text-align: center; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+                    🚀 BIENVENUE À DJASSA CI 🛒
+                </h2>
+                <p style="font-size: 1.3em; font-weight: bold; text-align: center; color: #2d3748; margin-bottom: 15px;">
+                    Votre Plateforme de Vente et d'achat en Ligne
+                </p>
+                <p style="font-size: 1.1em; text-align: center; color: #4a5568; line-height: 1.6;">
+                    nous vous donnons la possibilité de vendre vos objets d'occasion et aussi en acheter facilement en cas de besoin !
+                </p>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="showSection('articles')" style="font-size: 1.2em; padding: 15px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; cursor: pointer; margin: 10px;">
+                        🛍️ Voir les Articles
+                    </button>
+                    <button onclick="showSection('vendre')" style="font-size: 1.2em; padding: 15px 30px; background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color: white; border: none; border-radius: 10px; cursor: pointer; margin: 10px;">
+                        💰 Vendre un Article
+                    </button>
+                </div>
+            </div>
+
+            <!-- Advertising Slideshow -->
+            <div class="slideshow-container">
+                <div class="slide active">
+                    <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" alt="Vêtements et mode">
+                    <div class="overlay">
+                        <h2>🛍️ Vêtements & Mode</h2>
+                        <p>Découvrez une collection incroyable de vêtements tendance et accessoires de mode à des prix imbattables !</p>
+                        <a href="#articles" class="cta-button" onclick="showSection('articles')">Voir les Articles</a>
+                    </div>
+                </div>
+                <div class="slide">
+                    <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Téléphones et smartphones">
+                    <div class="overlay">
+                        <h2>📱 Téléphones & Smartphones</h2>
+                        <p>Les derniers modèles de téléphones et smartphones avec les meilleures performances et fonctionnalités !</p>
+                        <a href="#articles" class="cta-button" onclick="showSection('articles')">Voir les Articles</a>
+                    </div>
+                </div>
+                <div class="slide">
+                    <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=2058&q=80" alt="Canapés et meubles">
+                    <div class="overlay">
+                        <h2>🛋️ Canapés & Meubles</h2>
+                        <p>Transformez votre espace avec nos canapés confortables et meubles élégants pour votre maison !</p>
+                        <a href="#articles" class="cta-button" onclick="showSection('articles')">Voir les Articles</a>
+                    </div>
+                </div>
+                <div class="slide">
+                    <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Ordinateurs et laptops">
+                    <div class="overlay">
+                        <h2>💻 Ordinateurs & Laptops</h2>
+                        <p>Des ordinateurs puissants et des laptops performants pour le travail, les études et les loisirs !</p>
+                        <a href="#articles" class="cta-button" onclick="showSection('articles')">Voir les Articles</a>
+                    </div>
+                </div>
+                <div class="slide">
+                    <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Électronique et gadgets">
+                    <div class="overlay">
+                        <h2>⚡ Électronique & Gadgets</h2>
+                        <p>Une large gamme d'appareils électroniques, gadgets innovants et accessoires technologiques !</p>
+                        <a href="#articles" class="cta-button" onclick="showSection('articles')">Voir les Articles</a>
+                    </div>
+                </div>
+                <div class="slide">
+                    <img src="https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Audio et musique">
+                    <div class="overlay">
+                        <h2>🎵 Audio & Musique</h2>
+                        <p>Casques, enceintes et équipements audio de haute qualité pour une expérience musicale exceptionnelle !</p>
+                        <a href="#articles" class="cta-button" onclick="showSection('articles')">Voir les Articles</a>
+                    </div>
+                </div>
+            </div>
+            <div class="dots">
+                <span class="dot active" onclick="currentSlide(1)"></span>
+                <span class="dot" onclick="currentSlide(2)"></span>
+                <span class="dot" onclick="currentSlide(3)"></span>
+                <span class="dot" onclick="currentSlide(4)"></span>
+                <span class="dot" onclick="currentSlide(5)"></span>
+                <span class="dot" onclick="currentSlide(6)"></span>
+            </div>
+
+        </div>
+
+        <!-- Boutiques Section -->
+        <div id="boutiques" class="page-section">
+            <header>
+                <h1>BOUTIQUES DES VENDEURS</h1>
+            </header>
+            <div id="boutiques-content" class="output"></div>
+        </div>
+
+        <!-- Articles Section -->
+        <div id="articles" class="page-section">
+            <header>
+                <h1>ARTICLES DISPONIBLES</h1>
+            </header>
+            <div id="articles-content" class="output"></div>
+        </div>
+
+        <!-- Vendre Section -->
+        <div id="vendre" class="page-section">
+            <header>
+                <h1>VENDRE UN ARTICLE</h1>
+            </header>
+            <div class="section">
+                <h2>Informations de l'Article</h2>
+                <label for="photo">Photo de l'article :</label>
+                <input type="file" id="photo" accept="image/*">
+                <input type="number" id="montant" placeholder="Entrez le montant de votre article">
+                <input type="text" id="information" placeholder="Entrez les informations vraies de votre article">
+                <select id="categorie">
+                    <option value="">Choisissez une catégorie</option>
+                    <option value="Téléphones">Téléphones</option>
+                    <option value="Ordinateurs">Ordinateurs</option>
+                    <option value="Tablettes">Tablettes</option>
+                    <option value="Audio">Audio</option>
+                    <option value="TV">TV</option>
+                    <option value="Gaming">Gaming</option>
+                    <option value="Montres">Montres</option>
+                    <option value="Électroménager">Électroménager</option>
+                    <option value="Informatique">Informatique</option>
+                    <option value="Sécurité">Sécurité</option>
+                    <option value="Climatisation">Climatisation</option>
+                    <option value="Accessoires">Accessoires</option>
+                    <option value="Autre">Autre</option>
+                </select>
+                <input type="tel" id="vendeur-compte" placeholder="Votre numéro de compte mobile (ex: +225 XX XX XX XX XX)">
+                <input type="text" id="vendeur-localisation" placeholder="Votre localisation (ville, quartier)">
+                <button onclick="vendre()">Publier pour Vente</button>
+            </div>
+            <div id="vendre-output" class="output"></div>
+        </div>
+
+        <!-- Contact Section -->
+        <div id="contact" class="page-section">
+            <header>
+                <h1>CONTACTEZ-NOUS</h1>
+            </header>
+            <div class="section">
+                <h2>Informations de Contact</h2>
+                <p><strong>Adresse :</strong> Djassa CI, Côte d'Ivoire</p>
+                <p><strong>Téléphone :</strong> +225 XX XX XX XX XX</p>
+                <p><strong>Email :</strong> contact@djassaci.ci</p>
+                <p><strong>Heures d'ouverture :</strong> Lundi - Samedi, 8h - 18h</p>
+            </div>
+            <div class="section">
+                <h2>Envoyez-nous un message</h2>
+                <input type="text" id="contact-nom" placeholder="Votre nom">
+                <input type="email" id="contact-email" placeholder="Votre email">
+                <input type="text" id="contact-sujet" placeholder="Sujet">
+                <textarea id="contact-message" placeholder="Votre message" rows="5"></textarea>
+                <button onclick="envoyerMessage()">Envoyer</button>
+            </div>
+        </div>
+
+        <!-- Connexion Section -->
+        <div id="connexion" class="page-section">
+            <header>
+                <h1>CONNEXION</h1>
+            </header>
+            <div class="section">
+                <h2>Connectez-vous à votre compte</h2>
+                <input type="tel" id="numero-connexion" placeholder="Votre numéro de téléphone">
+                <input type="password" id="password-connexion" placeholder="Votre mot de passe">
+                <button onclick="connecter()">Se connecter</button>
+                <p>Pas encore de compte ? <a href="#" onclick="showSection('inscription')">S'inscrire</a></p>
+            </div>
+        </div>
+
+        <!-- Inscription Section -->
+        <div id="inscription" class="page-section">
+            <header>
+                <h1>INSCRIPTION</h1>
+            </header>
+            <div class="section">
+                <h2>Créez votre compte</h2>
+                <input type="text" id="nom" placeholder="Votre nom">
+                <input type="text" id="prenom" placeholder="Votre prénom">
+                <select id="countryCode" required>
+                    <option value="">🌍 Sélectionnez un code pays</option>
+                    <optgroup label="🌍 Afrique de l'Ouest (UEMOA)">
+                        <option value="+225">🇨🇮 +225 Côte d'Ivoire</option>
+                        <option value="+223">🇲🇱 +223 Mali</option>
+                        <option value="+221">🇸🇳 +221 Sénégal</option>
+                        <option value="+228">🇹🇬 +228 Togo</option>
+                        <option value="+229">🇧🇯 +229 Bénin</option>
+                        <option value="+226">🇧🇫 +226 Burkina Faso</option>
+                        <option value="+227">🇳🇪 +227 Niger</option>
+                        <option value="+224">🇬🇳 +224 Guinée</option>
+                    </optgroup>
+                    <optgroup label="🌍 Afrique de l'Ouest (Autres)">
+                        <option value="+233">🇬🇭 +233 Ghana</option>
+                        <option value="+245">🇬🇼 +245 Guinée-Bissau</option>
+                        <option value="+220">🇬🇲 +220 Gambie</option>
+                        <option value="+240">🇬🇶 +240 Guinée Équatoriale</option>
+                        <option value="+238">🇨🇻 +238 Cap-Vert</option>
+                        <option value="+231">🇱🇷 +231 Liberia</option>
+                        <option value="+232">🇸🇱 +232 Sierra Leone</option>
+                    </optgroup>
+                    <optgroup label="🌍 Afrique Centrale">
+                        <option value="+237">🇨🇲 +237 Cameroun</option>
+                        <option value="+241">🇬🇦 +241 Gabon</option>
+                        <option value="+242">🇨🇬 +242 Congo</option>
+                        <option value="+243">🇨🇩 +243 RD Congo</option>
+                        <option value="+236">🇹🇩 +236 Tchad</option>
+                        <option value="+222">🇲🇷 +222 Mauritanie</option>
+                    </optgroup>
+                    <optgroup label="🌍 Afrique de l'Est">
+                        <option value="+254">🇰🇪 +254 Kenya</option>
+                        <option value="+255">🇹🇿 +255 Tanzanie</option>
+                        <option value="+256">🇺🇬 +256 Ouganda</option>
+                        <option value="+250">🇷🇼 +250 Rwanda</option>
+                        <option value="+257">🇧🇮 +257 Burundi</option>
+                        <option value="+251">🇪🇹 +251 Éthiopie</option>
+                        <option value="+252">🇸🇴 +252 Somalie</option>
+                        <option value="+253">🇩🇯 +253 Djibouti</option>
+                        <option value="+258">🇲🇿 +258 Mozambique</option>
+                        <option value="+260">🇿🇲 +260 Zambie</option>
+                        <option value="+261">🇲🇬 +261 Madagascar</option>
+                        <option value="+263">🇿🇼 +263 Zimbabwe</option>
+                        <option value="+264">🇳🇦 +264 Namibie</option>
+                        <option value="+265">🇲🇼 +265 Malawi</option>
+                        <option value="+266">🇱🇸 +266 Lesotho</option>
+                        <option value="+267">🇧🇼 +267 Botswana</option>
+                        <option value="+268">🇸🇿 +268 Eswatini</option>
+                        <option value="+269">🇰🇲 +269 Comores</option>
+                        <option value="+27">🇿🇦 +27 Afrique du Sud</option>
+                        <option value="+291">🇪🇷 +291 Érythrée</option>
+                        <option value="+248">🇸🇨 +248 Seychelles</option>
+                        <option value="+249">🇸🇩 +249 Soudan</option>
+                    </optgroup>
+                    <optgroup label="🌍 Afrique du Nord">
+                        <option value="+212">🇲🇦 +212 Maroc</option>
+                        <option value="+213">🇩🇿 +213 Algérie</option>
+                        <option value="+216">🇹🇳 +216 Tunisie</option>
+                        <option value="+218">🇱🇾 +218 Libye</option>
+                        <option value="+20">🇪🇬 +20 Égypte</option>
+                    </optgroup>
+                    <optgroup label="🇪🇺 Europe">
+                        <option value="+33">🇫🇷 +33 France</option>
+                        <option value="+32">🇧🇪 +32 Belgique</option>
+                        <option value="+31">🇳🇱 +31 Pays-Bas</option>
+                        <option value="+49">🇩🇪 +49 Allemagne</option>
+                        <option value="+44">🇬🇧 +44 Royaume-Uni</option>
+                        <option value="+39">🇮🇹 +39 Italie</option>
+                        <option value="+34">🇪🇸 +34 Espagne</option>
+                        <option value="+41">🇨🇭 +41 Suisse</option>
+                        <option value="+43">🇦🇹 +43 Autriche</option>
+                        <option value="+46">🇸🇪 +46 Suède</option>
+                        <option value="+47">🇳🇴 +47 Norvège</option>
+                        <option value="+45">🇩🇰 +45 Danemark</option>
+                        <option value="+48">🇵🇱 +48 Pologne</option>
+                        <option value="+30">🇬🇷 +30 Grèce</option>
+                        <option value="+351">🇵🇹 +351 Portugal</option>
+                        <option value="+353">🇮🇪 +353 Irlande</option>
+                        <option value="+358">🇫🇮 +358 Finlande</option>
+                        <option value="+420">🇨🇿 +420 République tchèque</option>
+                        <option value="+421">🇸🇰 +421 Slovaquie</option>
+                        <option value="+36">🇭🇺 +36 Hongrie</option>
+                        <option value="+40">🇷🇴 +40 Roumanie</option>
+                        <option value="+359">🇧🇬 +359 Bulgarie</option>
+                        <option value="+385">🇭🇷 +385 Croatie</option>
+                        <option value="+386">🇸🇮 +386 Slovénie</option>
+                        <option value="+387">🇧🇦 +387 Bosnie-Herzégovine</option>
+                        <option value="+381">🇷🇸 +381 Serbie</option>
+                        <option value="+382">🇲🇪 +382 Monténégro</option>
+                        <option value="+383">🇽🇰 +383 Kosovo</option>
+                        <option value="+389">🇲🇰 +389 Macédoine du Nord</option>
+                        <option value="+355">🇦🇱 +355 Albanie</option>
+                        <option value="+356">🇲🇹 +356 Malte</option>
+                        <option value="+357">🇨🇾 +357 Chypre</option>
+                        <option value="+352">🇱🇺 +352 Luxembourg</option>
+                        <option value="+350">🇬🇮 +350 Gibraltar</option>
+                        <option value="+377">🇲🇨 +377 Monaco</option>
+                        <option value="+378">🇸🇲 +378 Saint-Marin</option>
+                        <option value="+423">🇱🇮 +423 Liechtenstein</option>
+                        <option value="+376">🇦🇩 +376 Andorre</option>
+                        <option value="+298">🇫🇴 +298 Îles Féroé</option>
+                        <option value="+299">🇬🇱 +299 Groenland</option>
+                        <option value="+354">🇮🇸 +354 Islande</option>
+                        <option value="+372">🇪🇪 +372 Estonie</option>
+                        <option value="+371">🇱🇻 +371 Lettonie</option>
+                        <option value="+370">🇱🇹 +370 Lituanie</option>
+                        <option value="+373">🇲🇩 +373 Moldavie</option>
+                        <option value="+380">🇺🇦 +380 Ukraine</option>
+                        <option value="+375">🇧🇾 +375 Biélorussie</option>
+                    </optgroup>
+                    <optgroup label="🌎 Amériques">
+                        <option value="+1">🇺🇸 +1 États-Unis/Canada</option>
+                        <option value="+55">🇧🇷 +55 Brésil</option>
+                        <option value="+52">🇲🇽 +52 Mexique</option>
+                        <option value="+54">🇦🇷 +54 Argentine</option>
+                        <option value="+57">🇨🇴 +57 Colombie</option>
+                        <option value="+58">🇻🇪 +58 Venezuela</option>
+                        <option value="+56">🇨🇱 +56 Chili</option>
+                        <option value="+51">🇵🇪 +51 Pérou</option>
+                        <option value="+593">🇪🇨 +593 Équateur</option>
+                        <option value="+598">🇺🇾 +598 Uruguay</option>
+                        <option value="+595">🇵🇾 +595 Paraguay</option>
+                        <option value="+591">🇧🇴 +591 Bolivie</option>
+                        <option value="+53">🇨🇺 +53 Cuba</option>
+                        <option value="+502">🇬🇹 +502 Guatemala</option>
+                        <option value="+503">🇸🇻 +503 Salvador</option>
+                        <option value="+504">🇭🇳 +504 Honduras</option>
+                        <option value="+505">🇳🇮 +505 Nicaragua</option>
+                        <option value="+506">🇨🇷 +506 Costa Rica</option>
+                        <option value="+507">🇵🇦 +507 Panama</option>
+                        <option value="+509">🇭🇹 +509 Haïti</option>
+                        <option value="+590">🇬🇵 +590 Guadeloupe</option>
+                        <option value="+596">🇲🇶 +596 Martinique</option>
+                        <option value="+594">🇬🇫 +594 Guyane française</option>
+                        <option value="+262">🇷🇪 +262 Réunion</option>
+                        <option value="+508">🇵🇲 +508 Saint-Pierre-et-Miquelon</option>
+                        <option value="+297">🇦🇼 +297 Aruba</option>
+                        <option value="+599">🇨🇼 +599 Curaçao</option>
+                        <option value="+501">🇧🇿 +501 Belize</option>
+                        <option value="+592">🇬🇾 +592 Guyana</option>
+                        <option value="+597">🇸🇷 +597 Suriname</option>
+                    </optgroup>
+                    <optgroup label="🌏 Asie">
+                        <option value="+91">🇮🇳 +91 Inde</option>
+                        <option value="+86">🇨🇳 +86 Chine</option>
+                        <option value="+81">🇯🇵 +81 Japon</option>
+                        <option value="+82">🇰🇷 +82 Corée du Sud</option>
+                        <option value="+84">🇻🇳 +84 Viêt Nam</option>
+                        <option value="+65">🇸🇬 +65 Singapour</option>
+                        <option value="+66">🇹🇭 +66 Thaïlande</option>
+                        <option value="+60">🇲🇾 +60 Malaisie</option>
+                        <option value="+63">🇵🇭 +63 Philippines</option>
+                        <option value="+62">🇮🇩 +62 Indonésie</option>
+                        <option value="+90">🇹🇷 +90 Turquie</option>
+                        <option value="+971">🇦🇪 +971 Émirats arabes unis</option>
+                        <option value="+966">🇸🇦 +966 Arabie saoudite</option>
+                        <option value="+965">🇰🇼 +965 Koweït</option>
+                        <option value="+974">🇶🇦 +974 Qatar</option>
+                        <option value="+973">🇧🇭 +973 Bahreïn</option>
+                        <option value="+968">🇴🇲 +968 Oman</option>
+                        <option value="+961">🇱🇧 +961 Liban</option>
+                        <option value="+962">🇯🇴 +962 Jordanie</option>
+                        <option value="+963">🇸🇾 +963 Syrie</option>
+                        <option value="+964">🇮🇶 +964 Irak</option>
+                        <option value="+972">🇮🇱 +972 Israël</option>
+                        <option value="+970">🇵🇸 +970 Palestine</option>
+                        <option value="+967">🇾🇪 +967 Yémen</option>
+                        <option value="+855">🇰🇭 +855 Cambodge</option>
+                        <option value="+856">🇱🇦 +856 Laos</option>
+                        <option value="+95">🇲🇲 +95 Birmanie</option>
+                        <option value="+880">🇧🇩 +880 Bangladesh</option>
+                        <option value="+92">🇵🇰 +92 Pakistan</option>
+                        <option value="+94">🇱🇰 +94 Sri Lanka</option>
+                        <option value="+93">🇦🇫 +93 Afghanistan</option>
+                        <option value="+960">🇲🇻 +960 Maldives</option>
+                        <option value="+975">🇧🇹 +975 Bhoutan</option>
+                        <option value="+977">🇳🇵 +977 Népal</option>
+                        <option value="+850">🇰🇵 +850 Corée du Nord</option>
+                        <option value="+852">🇭🇰 +852 Hong Kong</option>
+                        <option value="+853">🇲🇴 +853 Macao</option>
+                        <option value="+886">🇹🇼 +886 Taïwan</option>
+                        <option value="+976">🇲🇳 +976 Mongolie</option>
+                        <option value="+992">🇹🇯 +992 Tadjikistan</option>
+                        <option value="+993">🇹🇲 +993 Turkménistan</option>
+                        <option value="+994">🇦🇿 +994 Azerbaïdjan</option>
+                        <option value="+995">🇬🇪 +995 Géorgie</option>
+                        <option value="+996">🇰🇬 +996 Kirghizistan</option>
+                        <option value="+998">🇺🇿 +998 Ouzbékistan</option>
+                        <option value="+374">🇦🇲 +374 Arménie</option>
+                        <option value="+670">🇹🇱 +670 Timor oriental</option>
+                        <option value="+673">🇧🇳 +673 Brunei</option>
+                        <option value="+674">🇳🇷 +674 Nauru</option>
+                        <option value="+675">🇵🇬 +675 Papouasie-Nouvelle-Guinée</option>
+                        <option value="+676">🇹🇴 +676 Tonga</option>
+                        <option value="+677">🇸🇧 +677 Îles Salomon</option>
+                        <option value="+678">🇻🇺 +678 Vanuatu</option>
+                        <option value="+679">🇫🇯 +679 Fidji</option>
+                        <option value="+680">🇵🇼 +680 Palau</option>
+                        <option value="+681">🇼🇫 +681 Wallis-et-Futuna</option>
+                        <option value="+682">🇨🇰 +682 Îles Cook</option>
+                        <option value="+683">🇳🇺 +683 Niue</option>
+                        <option value="+684">🇦🇸 +684 Samoa américaines</option>
+                        <option value="+685">🇼🇸 +685 Samoa</option>
+                        <option value="+686">🇰🇮 +686 Kiribati</option>
+                        <option value="+687">🇳🇨 +687 Nouvelle-Calédonie</option>
+                        <option value="+688">🇹🇻 +688 Tuvalu</option>
+                        <option value="+689">🇵🇫 +689 Polynésie française</option>
+                        <option value="+690">🇹🇰 +690 Tokelau</option>
+                        <option value="+691">🇫🇲 +691 Micronésie</option>
+                        <option value="+692">🇲🇭 +692 Îles Marshall</option>
+                    </optgroup>
+                    <optgroup label="🌏 Océanie">
+                        <option value="+61">🇦🇺 +61 Australie</option>
+                        <option value="+64">🇳🇿 +64 Nouvelle-Zélande</option>
+                    </optgroup>
+                    <optgroup label="🗺️ Autres Régions">
+                        <option value="+7">🇷🇺 +7 Russie</option>
+                        <option value="+290">🇸🇭 +290 Sainte-Hélène</option>
+                        <option value="+500">🇫🇰 +500 Îles Falkland</option>
+                        <option value="+672">🇦🇶 +672 Antarctique</option>
+                    </optgroup>
+                </select>
+                <input type="tel" id="numero" placeholder="Votre numéro de téléphone (sans code pays)">
+                <input type="text" id="address" placeholder="Votre adresse">
+                <input type="password" id="password-inscription" placeholder="Votre mot de passe">
+                <button onclick="inscrire()">S'inscrire</button>
+                <p>Déjà un compte ? <a href="#" onclick="showSection('connexion')">Se connecter</a></p>
+            </div>
+        </div>
+
+        <!-- Panier Section -->
+        <div id="panier" class="page-section">
+            <header>
+                <h1>VOTRE PANIER</h1>
+            </header>
+            <div id="panier-content" class="output"></div>
+        </div>
+
+        <!-- Profil Section -->
+        <div id="profil" class="page-section">
+            <header>
+                <h1>MON PROFIL</h1>
+            </header>
+            <div id="profil-content" class="output"></div>
+        </div>
+
+        <!-- Sign Up Call-to-Action Section -->
+        <div class="section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center; padding: 40px; margin-bottom: 30px; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.3);">
+            <h2 style="font-size: 3em; margin-bottom: 20px; text-shadow: 3px 3px 6px rgba(0,0,0,0.5);">
+                🚀 INSCRIS-TOI MAINTENANT !
+            </h2>
+            <p style="font-size: 1.4em; font-weight: bold; margin-bottom: 25px; line-height: 1.4;">
+                Pour acheter et vendre des objets d'occasion de tous sorts :
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; font-size: 1.2em; font-weight: 500;">
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
+                    📱 Téléphones et ordinateurs
+                </div>
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
+                    🏍️ Moto, habits, voiture
+                </div>
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
+                    🛋️ Canapés et meubles
+                </div>
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
+                    ⚡ Éléments électroniques de tous sorts
+                </div>
+            </div>
+            <p style="font-size: 1.3em; font-weight: bold; margin-bottom: 30px; color: #ffd700;">
+                Et bien plus encore ! Rejoins notre communauté dès aujourd'hui !
+            </p>
+            <button onclick="showSection('inscription')" style="font-size: 1.5em; padding: 20px 40px; background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color: white; border: none; border-radius: 15px; cursor: pointer; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; box-shadow: 0 6px 15px rgba(0,0,0,0.3); transition: all 0.3s;">
+                S'INSCRIRE GRATUITEMENT
+            </button>
+        </div>
+
+        <!-- Contact Seller Section -->
+        <div class="section">
+            <h2>CONTACTER UN VENDEUR AVANT PAIEMENT</h2>
+            <p>Avant d'effectuer un paiement, vous pouvez contacter le vendeur pour obtenir plus d'informations sur l'article.</p>
+            <input type="text" id="vendeur-contact-nom" placeholder="Nom du vendeur">
+            <input type="tel" id="vendeur-contact-numero" placeholder="Numéro de téléphone du vendeur">
+            <input type="text" id="vendeur-contact-sujet" placeholder="Sujet de votre message">
+            <textarea id="vendeur-contact-message" placeholder="Votre message au vendeur" rows="4"></textarea>
+            <button onclick="contacterVendeur()">Envoyer le message</button>
+            <button onclick="contacterVendeurWhatsApp()">Contacter via WhatsApp</button>
+            <div id="vendeur-contact-output" class="output" style="display: none;"></div>
+        </div>
+
+        <footer>
+            <p>&copy; 2023 Djassa CI - Tous droits réservés</p>
+        </footer>
+    </div>
+
+    <script src="api.js"></script>
+    <script>
+        // Global variables
+        let articlesDisponibles = [];
+        let utilisateurs = [];
+        let utilisateurConnecte = null;
+        let panier = [];
+        let commandes = [];
+        let currentFilter = '';
+
+        // Initialize data from API
+        async function initialiserDonnees() {
+            try {
+                // Load articles from API
+                const articles = await window.DjassaAPI.products.getAll();
+                if (articles && Array.isArray(articles)) {
+                    articlesDisponibles = articles;
+                } else {
+                    // Fallback to default articles if API fails
+                    articlesDisponibles = getDefaultArticles();
+                }
+            } catch (error) {
+                console.error('Error loading articles from API:', error);
+                // Fallback to default articles
+                articlesDisponibles = getDefaultArticles();
+            }
+
+            // Load current user from localStorage (token-based)
+            const utilisateurSauvegarde = localStorage.getItem('utilisateurConnecte');
+            if (utilisateurSauvegarde) {
+                utilisateurConnecte = JSON.parse(utilisateurSauvegarde);
+                mettreAJourInterfaceUtilisateur();
+                
+                // IMPORTANT: Also restore the auth token for API calls
+                // The token is stored separately in localStorage by the API
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    // If user is logged in but no token, they need to re-login
+                    console.warn('User session found but no auth token. Please login again.');
+                    utilisateurConnecte = null;
+                    localStorage.removeItem('utilisateurConnecte');
+                    mettreAJourInterfaceUtilisateur();
+                }
+            }
+
+            // Load cart from localStorage
+            const panierSauvegarde = localStorage.getItem('panier');
+            if (panierSauvegarde) {
+                panier = JSON.parse(panierSauvegarde);
+                mettreAJourCompteurPanier();
+            }
+        }
+
+        // Default articles fallback
+        function getDefaultArticles() {
+            return [
+                { id: 1, name: "Téléphone portable", price: 50000, image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", description: "Smartphone dernière génération avec caméra haute résolution", categorie: "Téléphones", vendeur: "Admin" },
+                { id: 2, name: "Ordinateur portable", price: 300000, image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", description: "Ordinateur portable performant pour le travail et les jeux", categorie: "Ordinateurs", vendeur: "Admin" },
+                { id: 3, name: "Casque audio", price: 15000, image: "https://images.unsplash.com/photo-1484704849700-f032a568e944?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", description: "Casque sans fil avec réduction de bruit active", categorie: "Audio", vendeur: "Admin" },
+                { id: 4, name: "Chargeur USB", price: 5000, image: "https://images.unsplash.com/photo-1586953208448-b95a79798f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", description: "Chargeur rapide compatible avec tous les appareils", categorie: "Accessoires", vendeur: "Admin" },
+                { id: 5, name: "Tablette", price: 80000, image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", description: "Tablette tactile légère et puissante", categorie: "Tablettes", vendeur: "Admin" },
+                { id: 6, name: "Smartwatch", price: 25000, image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", description: "Montre connectée avec suivi de santé", categorie: "Montres", vendeur: "Admin" },
+                { id: 7, name: "Télévision LED", price: 150000, image: "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", description: "Télévision LED 4K avec écran incurvé et Smart TV", categorie: "TV", vendeur: "Admin" },
+                { id: 8, name: "Mixeur électrique", price: 20000, image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", description: "Mixeur puissant avec plusieurs vitesses et accessoires", categorie: "Électroménager", vendeur: "Admin" },
+                { id: 9, name: "Réfrigérateur", price: 250000, image: "https://images.unsplash.com/photo-1584568694244-14e61270b43b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", description: "Réfrigérateur double porte avec congélation rapide", categorie: "Électroménager", vendeur: "Admin" },
+                { id: 10, name: "Machine à laver", price: 180000, image: "https://images.unsplash.com/photo-1626806787426-591b6b8a0591?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", description: "Machine à laver frontale avec programmes intelligents", categorie: "Électroménager", vendeur: "Admin" },
+                { id: 11, name: "Console de jeu", price: 120000, image: "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", description: "Console de jeu dernière génération avec manettes incluses", categorie: "Gaming", vendeur: "Admin" },
+                { id: 12, name: "Imprimante laser", price: 45000, image: "https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", description: "Imprimante laser couleur rapide et économique", categorie: "Informatique", vendeur: "Admin" },
+                { id: 13, name: "Caméra de surveillance", price: 30000, image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", description: "Caméra HD avec vision nocturne et détection de mouvement", categorie: "Sécurité", vendeur: "Admin" },
+                { id: 14, name: "Enceinte Bluetooth", price: 12000, image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", description: "Enceinte portable Bluetooth avec batterie longue durée", categorie: "Audio", vendeur: "Admin" },
+                { id: 15, name: "Climatiseur", price: 200000, image: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", description: "Climatiseur split avec fonction économie d'énergie", categorie: "Climatisation", vendeur: "Admin" },
+                { id: 16, name: "Aspirateur robot", price: 80000, image: "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", description: "Aspirateur robot intelligent avec navigation laser", categorie: "Électroménager", vendeur: "Admin" }
+            ];
+        }
+
+        function sauvegarderArticles() {
+            localStorage.setItem('articlesDisponibles', JSON.stringify(articlesDisponibles));
+        }
+
+        function sauvegarderUtilisateurs() {
+            localStorage.setItem('utilisateurs', JSON.stringify(utilisateurs));
+        }
+
+        function sauvegarderPanier() {
+            localStorage.setItem('panier', JSON.stringify(panier));
+        }
+
+        function sauvegarderCommandes() {
+            localStorage.setItem('commandes', JSON.stringify(commandes));
+        }
+
+        // Navigation functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            initialiserDonnees();
+
+            const navLinks = document.querySelectorAll('.navbar a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    showSection(targetId);
+                });
+            });
+
+            // Search functionality
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.addEventListener('input', rechercherArticles);
+            }
+        });
+
+        function showSection(sectionId) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.page-section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Show the target section
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+
+            // Load content based on section
+            if (sectionId === 'articles') {
+                voirArticles();
+            } else if (sectionId === 'boutiques') {
+                voirBoutiques();
+            } else if (sectionId === 'panier') {
+                afficherPanier();
+            } else if (sectionId === 'profil') {
+                afficherProfil();
+            }
+        }
+
+        async function inscrire() {
+            const nom = document.getElementById('nom').value.trim();
+            const prenom = document.getElementById('prenom').value.trim();
+            const numero = document.getElementById('numero').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const password = document.getElementById('password-inscription').value.trim();
+
+            if (!nom || !prenom || !numero || !address || !password) {
+                alert("Veuillez remplir tous les champs.");
+                return;
+            }
+
+            // Validate phone number format
+            const phoneRegex = /^\+225\s?\d{2}\s?\d{2}\s?\d{2}\s?\d{2}\s?\d{2}$/;
+            if (!phoneRegex.test(numero)) {
+                alert("Veuillez entrer un numéro de téléphone valide au format +225 XX XX XX XX XX");
+                return;
+            }
+
+            // Validate password length
+            if (password.length < 6) {
+                alert("Le mot de passe doit contenir au moins 6 caractères.");
+                return;
+            }
+
+            try {
+                // Register via API
+                const result = await window.DjassaAPI.auth.register({
+                    nom,
+                    prenom,
+                    numero,
+                    address,
+                    password
+                });
+
+                if (result.error) {
+                    alert("Erreur: " + result.error);
+                    return;
+                }
+
+                // Auto-connect the user (already done by the API register function)
+                utilisateurConnecte = result.user;
+                localStorage.setItem('utilisateurConnecte', JSON.stringify(utilisateurConnecte));
+
+                mettreAJourInterfaceUtilisateur();
+
+                alert("Inscription réussie ! Bienvenue sur Djassa CI.");
+                showSection('accueil');
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert("Erreur lors de l'inscription. Veuillez réessayer.");
+            }
+        }
+
+        async function connecter() {
+            const numero = document.getElementById('numero-connexion').value.trim();
+            const password = document.getElementById('password-connexion').value.trim();
+
+            if (!numero || !password) {
+                alert("Veuillez saisir votre numéro de téléphone et mot de passe.");
+                return;
+            }
+
+            try {
+                const result = await window.DjassaAPI.auth.login(numero, password);
+                
+                if (result.error) {
+                    alert(result.error);
+                    return;
+                }
+
+                utilisateurConnecte = result.user;
+                localStorage.setItem('utilisateurConnecte', JSON.stringify(utilisateurConnecte));
+
+                mettreAJourInterfaceUtilisateur();
+                alert("Connexion réussie !");
+                showSection('accueil');
+            } catch (error) {
+                console.error('Login error:', error);
+                alert("Erreur de connexion. Veuillez vérifier votre connexion et réessayer.");
+            }
+        }
+
+        function deconnecter() {
+            window.DjassaAPI.auth.logout();
+            utilisateurConnecte = null;
+            localStorage.removeItem('utilisateurConnecte');
+            panier = [];
+            sauvegarderPanier();
+            mettreAJourInterfaceUtilisateur();
+            alert("Déconnexion réussie.");
+            showSection('accueil');
+        }
+
+        function toggleMobileMenu() {
+            const mobileMenu = document.querySelector('.mobile-menu');
+            mobileMenu.classList.toggle('active');
+        }
+
+        function mettreAJourInterfaceUtilisateur() {
+            const userInfo = document.getElementById('user-info');
+            const userInfoMobile = document.getElementById('user-info-mobile');
+            const loginBtn = document.getElementById('login-btn');
+            const registerBtn = document.getElementById('register-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            const cartBtn = document.getElementById('cart-btn');
+            const profileBtn = document.getElementById('profile-btn');
+            const loginBtnMobile = document.getElementById('login-btn-mobile');
+            const registerBtnMobile = document.getElementById('register-btn-mobile');
+            const logoutBtnMobile = document.getElementById('logout-btn-mobile');
+            const cartBtnMobile = document.getElementById('cart-btn-mobile');
+            const profileBtnMobile = document.getElementById('profile-btn-mobile');
+            const cartCountMobile = document.getElementById('cart-count-mobile');
+
+            if (utilisateurConnecte) {
+                userInfo.textContent = `Bienvenue, ${utilisateurConnecte.prenom} !`;
+                userInfoMobile.textContent = `Bienvenue, ${utilisateurConnecte.prenom} !`;
+                loginBtn.style.display = 'none';
+                registerBtn.style.display = 'none';
+                logoutBtn.style.display = 'inline-block';
+                cartBtn.style.display = 'inline-block';
+                profileBtn.style.display = 'inline-block';
+                loginBtnMobile.style.display = 'none';
+                registerBtnMobile.style.display = 'none';
+                logoutBtnMobile.style.display = 'block';
+                cartBtnMobile.style.display = 'block';
+                profileBtnMobile.style.display = 'block';
+            } else {
+                userInfo.textContent = '';
+                userInfoMobile.textContent = '';
+                loginBtn.style.display = 'inline-block';
+                registerBtn.style.display = 'inline-block';
+                logoutBtn.style.display = 'none';
+                cartBtn.style.display = 'none';
+                profileBtn.style.display = 'none';
+                loginBtnMobile.style.display = 'block';
+                registerBtnMobile.style.display = 'block';
+                logoutBtnMobile.style.display = 'none';
+                cartBtnMobile.style.display = 'none';
+                profileBtnMobile.style.display = 'none';
+            }
+        }
+
+        async function vendre() {
+            if (!utilisateurConnecte) {
+                alert("Veuillez vous connecter pour vendre un article.");
+                showSection('connexion');
+                return;
+            }
+
+            const photoInput = document.getElementById('photo');
+            const montant = parseFloat(document.getElementById('montant').value);
+            const information = document.getElementById('information').value.trim();
+            const categorie = document.getElementById('categorie').value;
+            const vendeurCompte = document.getElementById('vendeur-compte').value.trim();
+            const vendeurLocalisation = document.getElementById('vendeur-localisation').value.trim();
+
+            if (!photoInput.files[0] || !montant || !information || !categorie || !vendeurCompte || !vendeurLocalisation) {
+                alert("Veuillez remplir tous les champs et sélectionner une photo.");
+                return;
+            }
+
+            if (montant <= 0) {
+                alert("Le prix doit être supérieur à 0.");
+                return;
+            }
+
+            const file = photoInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async function(e) {
+                const imageUrl = e.target.result;
+                
+                // Debug: Check if user is logged in
+                console.log('Debug - User logged in:', utilisateurConnecte ? 'Yes' : 'No');
+                console.log('Debug - Token:', localStorage.getItem('authToken') ? 'Present' : 'Missing');
+                
+                // Create product data - let backend handle the seller info from the token
+                const nouveauArticle = {
+                    name: information.split(' ').slice(0, 3).join(' '),
+                    price: montant,
+                    image: imageUrl,
+                    description: information,
+                    categorie: categorie,
+                    // Don't send vendeur - backend will create it from authenticated user
+                    vendeurCompte: vendeurCompte,
+                    vendeurLocalisation: vendeurLocalisation
+                };
+
+                try {
+                    // Save to backend API (for products to sell)
+                    const result = await window.DjassaAPI.products.create(nouveauArticle);
+                    
+                    console.log('Debug - API Result:', result);
+                    
+                    if (result.error) {
+                        // Check for token-related errors and show friendly message
+                        if (result.error.includes('token') || result.error.includes('Token')) {
+                            alert("Votre session a expiré. Veuillez vous reconnecter pour publier un article.");
+                            window.DjassaAPI.auth.logout();
+                            showSection('connexion');
+                        } else {
+                            alert("Erreur: " + result.error);
+                        }
+                        return;
+                    }
+
+                    // Add to local array
+                    articlesDisponibles.push(result.product);
+                    sauvegarderArticles();
+
+                    // Vider le formulaire
+                    document.getElementById('photo').value = '';
+                    document.getElementById('montant').value = '';
+                    document.getElementById('information').value = '';
+                    document.getElementById('categorie').value = '';
+                    document.getElementById('vendeur-compte').value = '';
+                    document.getElementById('vendeur-localisation').value = '';
+
+                    document.getElementById('vendre-output').innerHTML = "Article publié pour vente avec succès ! Il est maintenant disponible dans la section Articles.";
+
+                    // Actualiser automatiquement la liste des articles
+                    voirArticles();
+                } catch (error) {
+                    console.error('Error saving article:', error);
+                    alert("Erreur lors de la publication de l'article. Veuillez réessayer. Détails: " + error.message);
+                }
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function voirArticles(filtre = '') {
+            currentFilter = filtre;
+            let articlesFiltres = articlesDisponibles;
+
+            if (filtre) {
+                articlesFiltres = articlesDisponibles.filter(article =>
+                    article.name.toLowerCase().includes(filtre.toLowerCase()) ||
+                    article.description.toLowerCase().includes(filtre.toLowerCase()) ||
+                    article.categorie.toLowerCase().includes(filtre.toLowerCase())
+                );
+            }
+
+            let output = `<div class="search-bar">
+                <input type="text" id="search-input" placeholder="Rechercher des articles..." value="${filtre}">
+            </div>
+            <h3>Articles Disponibles (${articlesFiltres.length}) :</h3><div class="grid">`;
+
+            articlesFiltres.forEach(article => {
+                // Get the seller name - could be either 'vendeurNom' (from backend) or 'vendeur' (from default articles)
+                const sellerName = article.vendeurNom || article.vendeur || 'Inconnu';
+                output += `
+                    <div class="article-card">
+                        <img src="${article.image}" alt="${article.name}" onclick="voirDetailsArticle(${article.id})" style="cursor: pointer;">
+                        <div class="content">
+                            <h3 onclick="voirDetailsArticle(${article.id})" style="cursor: pointer;">${article.name}</h3>
+                            <p>${article.description.substring(0, 100)}${article.description.length > 100 ? '...' : ''}</p>
+                            <div class="price">${article.price.toLocaleString()} FCFA</div>
+                            <div class="article-meta">
+                                <small>Catégorie: ${article.categorie}</small><br>
+                                <small>Vendeur: ${sellerName}</small>
+                            </div>
+                            <button onclick="ajouterAuPanier(${article.id})">Ajouter au Panier</button>
+                        </div>
+                    </div>
+                `;
+            });
+            output += "</div>";
+            document.getElementById('articles-content').innerHTML = output;
+
+            // Attach search event listener after creating the input
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.addEventListener('input', rechercherArticles);
+            }
+        }
+
+        function rechercherArticles() {
+            const searchTerm = document.getElementById('search-input').value;
+            voirArticles(searchTerm);
+        }
+
+        function voirDetailsArticle(articleId) {
+            const article = articlesDisponibles.find(a => a.id === articleId);
+            if (!article) return;
+
+            let output = `
+                <div class="article-details">
+                    <button onclick="voirArticles('${currentFilter}')" class="back-btn">← Retour aux articles</button>
+                    <div class="article-detail-card">
+                        <img src="${article.image}" alt="${article.name}">
+                        <div class="content">
+                            <h2>${article.name}</h2>
+                            <p class="description">${article.description}</p>
+                            <div class="price">${article.price.toLocaleString()} FCFA</div>
+                            <div class="article-meta">
+                                <p><strong>Catégorie:</strong> ${article.categorie}</p>
+                                <p><strong>Vendeur:</strong> ${article.vendeurNom || article.vendeur || 'Inconnu'}</p>
+                                <p><strong>Localisation:</strong> ${article.vendeurLocalisation || 'Non spécifiée'}</p>
+                                <p><strong>Date de publication:</strong> ${new Date(article.datePublication).toLocaleDateString('fr-FR')}</p>
+                            </div>
+                            <div class="article-actions">
+                                <button onclick="contacterVendeurDirect(${article.id})" class="contact-seller-btn">📞 Contacter le Vendeur</button>
+                                <button onclick="contacterVendeurWhatsAppDirect(${article.id})" class="whatsapp-btn" style="background: #25d366 !important; color: white !important;">💬 WhatsApp</button>
+                                <button onclick="ajouterAuPanier(${article.id})" class="add-to-cart-btn">Ajouter au Panier</button>
+                                ${utilisateurConnecte && utilisateurConnecte.prenom + ' ' + utilisateurConnecte.nom === (article.vendeurNom || article.vendeur || 'Inconnu') ? `<button onclick="supprimerArticle(${article.id})" class="delete-article-btn" style="background: #e53e3e !important; color: white !important;">🗑️ Supprimer l'Article</button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('articles-content').innerHTML = output;
+        }
+
+        function ajouterAuPanier(articleId) {
+            if (!utilisateurConnecte) {
+                alert("Veuillez vous connecter pour ajouter des articles au panier.");
+                showSection('connexion');
+                return;
+            }
+
+            const article = articlesDisponibles.find(a => a.id === articleId);
+            if (!article) return;
+
+            const articleExistant = panier.find(a => a.id === articleId);
+            if (articleExistant) {
+                articleExistant.quantite += 1;
+            } else {
+                panier.push({
+                    ...article,
+                    quantite: 1
+                });
+            }
+
+            sauvegarderPanier();
+            mettreAJourCompteurPanier();
+            alert(`${article.name} ajouté au panier !`);
+        }
+
+        function mettreAJourCompteurPanier() {
+            const cartCount = document.getElementById('cart-count');
+            const cartCountMobile = document.getElementById('cart-count-mobile');
+            const totalItems = panier.reduce((sum, item) => sum + item.quantite, 0);
+            cartCount.textContent = totalItems;
+            if (cartCountMobile) cartCountMobile.textContent = totalItems;
+        }
+
+        function afficherPanier() {
+            if (!utilisateurConnecte) {
+                showSection('connexion');
+                return;
+            }
+
+            let output = '<h3>Votre Panier</h3>';
+
+            if (panier.length === 0) {
+                output += '<p>Votre panier est vide.</p>';
+            } else {
+                let total = 0;
+                output += '<div class="cart-items">';
+                panier.forEach((item, index) => {
+                    const itemTotal = item.price * item.quantite;
+                    total += itemTotal;
+                    output += `
+                        <div class="cart-item">
+                            <img src="${item.image}" alt="${item.name}">
+                            <div class="item-details">
+                                <h4>${item.name}</h4>
+                                <p>${item.price.toLocaleString()} FCFA x ${item.quantite}</p>
+                                <p><strong>Total: ${itemTotal.toLocaleString()} FCFA</strong></p>
+                            </div>
+                            <div class="item-actions">
+                                <button onclick="modifierQuantite(${index}, -1)">-</button>
+                                <span>${item.quantite}</span>
+                                <button onclick="modifierQuantite(${index}, 1)">+</button>
+                                <button onclick="supprimerDuPanier(${index})" class="remove-btn">Supprimer</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                output += '</div>';
+                output += `<div class="cart-total">
+                    <h3>Total: ${total.toLocaleString()} FCFA</h3>
+                    <button onclick="passerCommande()" class="checkout-btn">Passer la Commande</button>
+                </div>`;
+            }
+
+            document.getElementById('panier-content').innerHTML = output;
+        }
+
+        function modifierQuantite(index, changement) {
+            panier[index].quantite += changement;
+            if (panier[index].quantite <= 0) {
+                panier.splice(index, 1);
+            }
+            sauvegarderPanier();
+            afficherPanier();
+            mettreAJourCompteurPanier();
+        }
+
+        function supprimerDuPanier(index) {
+            panier.splice(index, 1);
+            sauvegarderPanier();
+            afficherPanier();
+            mettreAJourCompteurPanier();
+        }
+
+        function passerCommande() {
+            if (panier.length === 0) {
+                alert("Votre panier est vide.");
+                return;
+            }
+
+            // Afficher le formulaire de paiement
+            afficherFormulairePaiement();
+        }
+
+        function afficherFormulairePaiement() {
+            const total = panier.reduce((sum, item) => sum + (item.price * item.quantite), 0);
+
+            let output = `
+                <h3>Paiement</h3>
+                <div class="section">
+                    <h4>Résumé de la commande</h4>
+                    <div class="cart-items">
+                        ${panier.map(item => `
+                            <div class="cart-item">
+                                <img src="${item.image}" alt="${item.name}">
+                                <div class="item-details">
+                                    <h4>${item.name}</h4>
+                                    <p>${item.price.toLocaleString()} FCFA x ${item.quantite}</p>
+                                    <p><strong>Total: ${(item.price * item.quantite).toLocaleString()} FCFA</strong></p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="cart-total">
+                        <h3>Total: ${total.toLocaleString()} FCFA</h3>
+                    </div>
+
+                    <h4>Informations de paiement</h4>
+                    <select id="payment-method">
+                        <option value="">Choisissez un moyen de paiement</option>
+                        <option value="wave">Wave</option>
+                        <option value="orange">Orange Money</option>
+                        <option value="mtn">MTN Money</option>
+                        <option value="moov">Moov Money</option>
+                    </select>
+                    <input type="tel" id="phone-number" placeholder="Numéro de téléphone (ex: +225 XX XX XX XX XX)">
+                    <input type="text" id="account-name" placeholder="Nom du compte">
+
+                    <button onclick="traiterPaiement()" class="checkout-btn">Payer maintenant</button>
+                    <button onclick="afficherPanier()" class="back-btn">Retour au panier</button>
+                </div>
+            `;
+
+            document.getElementById('panier-content').innerHTML = output;
+        }
+
+        async function traiterPaiement() {
+            const paymentMethod = document.getElementById('payment-method').value;
+            const phoneNumber = document.getElementById('phone-number').value.trim();
+            const accountName = document.getElementById('account-name').value.trim();
+
+            if (!paymentMethod || !phoneNumber || !accountName) {
+                alert("Veuillez remplir toutes les informations de paiement.");
+                return;
+            }
+
+            // Validate phone number format
+            const phoneRegex = /^\+225\s?\d{2}\s?\d{2}\s?\d{2}\s?\d{2}\s?\d{2}$/;
+            if (!phoneRegex.test(phoneNumber)) {
+                alert("Veuillez entrer un numéro de téléphone valide au format +225 XX XX XX XX XX");
+                return;
+            }
+
+            // Simulation de paiement mobile money
+            alert(`Paiement en cours via ${paymentMethod}...\n\nNuméro: ${phoneNumber}\nNom du compte: ${accountName}\n\n(Simulation - en production, cela déclencherait une vraie transaction mobile money)`);
+
+            try {
+                // Prepare order data
+                const orderData = {
+                    items: panier.map(item => ({
+                        id: item.id,
+                        name: item.name,
+                        price: item.price,
+                        quantite: item.quantite,
+                        image: item.image
+                    })),
+                    paymentMethod,
+                    phoneNumber,
+                    accountName
+                };
+
+                // Create order via API
+                const result = await window.DjassaAPI.orders.create(orderData);
+
+                if (result.error) {
+                    alert("Erreur: " + result.error);
+                    return;
+                }
+
+                // Clear local cart after successful order
+                panier = [];
+                sauvegarderPanier();
+                mettreAJourCompteurPanier();
+
+                alert(`✅ Paiement réussi !\n\nCommande #${result.order.id} passée avec succès.\nTotal: ${result.order.total.toLocaleString()} FCFA\nMéthode: ${paymentMethod}\n\nVous recevrez une confirmation par SMS.`);
+                afficherPanier();
+            } catch (error) {
+                console.error('Order error:', error);
+                alert("Erreur lors de la création de la commande. Veuillez réessayer.");
+            }
+        }
+
+        async function afficherProfil() {
+            if (!utilisateurConnecte) {
+                showSection('connexion');
+                return;
+            }
+
+            // Load orders from API
+            let commandesUtilisateur = [];
+            try {
+                commandesUtilisateur = await window.DjassaAPI.orders.getMyOrders();
+                if (!Array.isArray(commandesUtilisateur)) {
+                    commandesUtilisateur = [];
+                }
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                commandesUtilisateur = [];
+            }
+
+            // Get my articles from API
+            let mesArticles = [];
+            try {
+                mesArticles = await window.DjassaAPI.products.getMyProducts();
+                if (!Array.isArray(mesArticles)) {
+                    mesArticles = [];
+                }
+            } catch (error) {
+                console.error('Error loading my products:', error);
+                mesArticles = [];
+            }
+
+            let output = `
+                <h3>Mon Profil</h3>
+                <div class="profile-info">
+                    <h4>Informations Personnelles</h4>
+                    <p><strong>Nom:</strong> ${utilisateurConnecte.nom}</p>
+                    <p><strong>Prénom:</strong> ${utilisateurConnecte.prenom}</p>
+                    <p><strong>Téléphone:</strong> ${utilisateurConnecte.numero}</p>
+                    <p><strong>Adresse:</strong> ${utilisateurConnecte.address}</p>
+                    <p><strong>Date d'inscription:</strong> ${new Date(utilisateurConnecte.dateInscription).toLocaleDateString('fr-FR')}</p>
+                </div>
+
+                <h4>Mes Commandes (${commandesUtilisateur.length})</h4>
+            `;
+
+            if (commandesUtilisateur.length === 0) {
+                output += '<p>Aucune commande trouvée.</p>';
+            } else {
+                commandesUtilisateur.forEach(commande => {
+                    output += `
+                        <div class="order-card">
+                            <h5>Commande #${commande.id}</h5>
+                            <p><strong>Date:</strong> ${new Date(commande.date).toLocaleDateString('fr-FR')}</p>
+                            <p><strong>Total:</strong> ${commande.total.toLocaleString()} FCFA</p>
+                            <p><strong>Statut:</strong> ${commande.statut}</p>
+                            <p><strong>Méthode de paiement:</strong> ${commande.methodePaiement || 'Carte de crédit'}</p>
+                            ${commande.numeroPaiement ? `<p><strong>Numéro de paiement:</strong> ${commande.numeroPaiement}</p>` : ''}
+                            ${commande.nomCompte ? `<p><strong>Nom du compte:</strong> ${commande.nomCompte}</p>` : ''}
+                            <details>
+                                <summary>Voir les articles</summary>
+                                <div class="cart-items">
+                                    ${commande.articles.map(item => `
+                                        <div class="cart-item">
+                                            <img src="${item.image}" alt="${item.name}">
+                                            <div class="item-details">
+                                                <h4>${item.name}</h4>
+                                                <p>${item.price.toLocaleString()} FCFA x ${item.quantite}</p>
+                                                <p><strong>Total: ${(item.price * item.quantite).toLocaleString()} FCFA</strong></p>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </details>
+                        </div>
+                    `;
+                });
+            }
+
+            output += `<h4>Mes Articles (${mesArticles.length})</h4>`;
+
+            if (mesArticles.length === 0) {
+                output += '<p>Aucun article publié.</p>';
+            } else {
+                output += '<div class="grid">';
+                mesArticles.forEach(article => {
+                    output += `
+                        <div class="article-card">
+                            <img src="${article.image}" alt="${article.name}">
+                            <div class="content">
+                                <h3>${article.name}</h3>
+                                <p>${article.description.substring(0, 100)}${article.description.length > 100 ? '...' : ''}</p>
+                                <div class="price">${article.price.toLocaleString()} FCFA</div>
+                                <div class="article-meta">
+                                    <small>Catégorie: ${article.categorie}</small><br>
+                                    <small>Localisation: ${article.vendeurLocalisation}</small><br>
+                                    <small>Date: ${new Date(article.datePublication).toLocaleDateString('fr-FR')}</small>
+                                </div>
+                                <button onclick="supprimerArticle(${article.id})" class="delete-article-btn" style="background: #e53e3e !important; color: white !important;">🗑️ Supprimer</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                output += '</div>';
+            }
+
+            document.getElementById('profil-content').innerHTML = output;
+        }
+
+        function acheterArticle(nomArticle) {
+            alert(`Vous avez sélectionné : ${nomArticle}. Ajoutez-le à votre panier !`);
+        }
+
+        async function envoyerCodeConfirmation() {
+            const nom = document.getElementById('nom').value.trim();
+            const prenom = document.getElementById('prenom').value.trim();
+            const numero = document.getElementById('numero').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const password = document.getElementById('password-inscription').value.trim();
+
+            if (!nom || !prenom || !numero || !address || !password) {
+                alert("Veuillez remplir tous les champs avant d'envoyer le code.");
+                return;
+            }
+
+            // Generate a 6-digit confirmation code
+            const codeConfirmation = Math.floor(100000 + Math.random() * 900000);
+            localStorage.setItem('codeConfirmation', codeConfirmation.toString());
+            localStorage.setItem('codeExpiration', (Date.now() + 5 * 60 * 1000).toString()); // 5 minutes
+
+            // Show the code verification section
+            document.getElementById('code-verification').style.display = 'block';
+            document.getElementById('nom').disabled = true;
+            document.getElementById('prenom').disabled = true;
+            document.getElementById('numero').disabled = true;
+            document.getElementById('address').disabled = true;
+            document.getElementById('password-inscription').disabled = true;
+
+            // Simulation: Show the code in alert (in production, send via SMS)
+            alert(`Code de confirmation envoyé à ${numero}: ${codeConfirmation}\n\n(Simulation - en production, ce code serait envoyé par SMS)`);
+        }
+
+        function verifierCodeConfirmation() {
+            const codeEntre = document.getElementById('code-confirmation').value.trim();
+            const codeStocke = localStorage.getItem('codeConfirmation');
+            const expiration = localStorage.getItem('codeExpiration');
+
+            if (!codeEntre) {
+                alert("Veuillez entrer le code de confirmation.");
+                return;
+            }
+
+            if (Date.now() > parseInt(expiration)) {
+                alert("Le code de confirmation a expiré. Veuillez en demander un nouveau.");
+                localStorage.removeItem('codeConfirmation');
+                localStorage.removeItem('codeExpiration');
+                return;
+            }
+
+            if (codeEntre !== codeStocke) {
+                alert("Code de confirmation incorrect. Veuillez réessayer.");
+                return;
+            }
+
+            // Code is correct, proceed with registration
+            inscrireUtilisateur();
+        }
+
+        async function inscrireUtilisateur() {
+            const nom = document.getElementById('nom').value.trim();
+            const prenom = document.getElementById('prenom').value.trim();
+            const numero = document.getElementById('numero').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const password = document.getElementById('password-inscription').value.trim();
+
+            // Additional validation
+            if (password.length < 6) {
+                alert("Le mot de passe doit contenir au moins 6 caractères.");
+                return;
+            }
+
+            const phoneRegex = /^\+225\s?\d{2}\s?\d{2}\s?\d{2}\s?\d{2}\s?\d{2}$/;
+            if (!phoneRegex.test(numero)) {
+                alert("Veuillez entrer un numéro de téléphone valide au format +225 XX XX XX XX XX");
+                return;
+            }
+
+            try {
+                // Register via API
+                const result = await window.DjassaAPI.auth.register({
+                    nom,
+                    prenom,
+                    numero,
+                    address,
+                    password
+                });
+
+                if (result.error) {
+                    alert("Erreur: " + result.error);
+                    return;
+                }
+
+                // Clean up confirmation code
+                localStorage.removeItem('codeConfirmation');
+                localStorage.removeItem('codeExpiration');
+
+                // Auto-connect the user (already done by the API register function)
+                utilisateurConnecte = result.user;
+                mettreAJourInterfaceUtilisateur();
+
+                alert("Inscription réussie ! Bienvenue sur Djassa CI.");
+                showSection('accueil');
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert("Erreur lors de l'inscription. Veuillez réessayer.");
+            }
+        }
+
+        function contacterVendeurDirect(articleId) {
+            const article = articlesDisponibles.find(a => a.id === articleId);
+            if (!article) {
+                alert("Article non trouvé.");
+                return;
+            }
+
+            const numeroVendeur = article.vendeurCompte;
+            const nomVendeur = article.vendeurNom || article.vendeur || 'Inconnu';
+
+            if (!numeroVendeur) {
+                alert("Numéro de téléphone du vendeur non disponible.");
+                return;
+            }
+
+            // Simulation d'appel téléphonique ou envoi de SMS
+            const confirmation = confirm(`Voulez-vous contacter ${nomVendeur} au numéro ${numeroVendeur} ?\n\nCette action simulera un appel téléphonique ou l'envoi d'un SMS pour discuter de l'article "${article.name}".`);
+
+            if (confirmation) {
+                // Simulation d'un appel réussi
+                alert(`Appel en cours vers ${nomVendeur} (${numeroVendeur})...\n\n(Simulation - en production, cela lancerait un appel téléphonique ou ouvrirait l'application de téléphone)\n\nVous pouvez maintenant discuter des détails de l'article avant de procéder au paiement.`);
+            }
+        }
+
+        function contacterVendeurWhatsAppDirect(articleId) {
+            const article = articlesDisponibles.find(a => a.id === articleId);
+            if (!article) {
+                alert("Article non trouvé.");
+                return;
+            }
+
+            const numeroVendeur = article.vendeurCompte;
+            const nomVendeur = article.vendeurNom || article.vendeur || 'Inconnu';
+
+            if (!numeroVendeur) {
+                alert("Numéro de téléphone du vendeur non disponible.");
+                return;
+            }
+
+            // Format the phone number for WhatsApp (remove spaces, ensure + prefix)
+            let formattedNumber = numeroVendeur.replace(/\s+/g, '');
+            if (!formattedNumber.startsWith('+')) {
+                formattedNumber = '+' + formattedNumber;
+            }
+
+            // Create WhatsApp URL with pre-filled message
+            const whatsappMessage = `Bonjour ${nomVendeur},\n\nJe suis intéressé par votre article "${article.name}".\n\nPouvez-vous me donner plus d'informations ?\n\nCordialement,\nClient Djassa CI`;
+            const whatsappUrl = `https://wa.me/${formattedNumber.replace('+', '')}?text=${encodeURIComponent(whatsappMessage)}`;
+
+            // Open WhatsApp in a new window/tab
+            window.open(whatsappUrl, '_blank');
+
+            // Show confirmation
+            alert(`Ouverture de WhatsApp pour contacter ${nomVendeur} au sujet de "${article.name}".\n\nMessage pré-rempli envoyé.`);
+        }
+
+        function contacterVendeurWhatsApp() {
+            const nomVendeur = document.getElementById('vendeur-contact-nom').value.trim();
+            const numeroVendeur = document.getElementById('vendeur-contact-numero').value.trim();
+            const sujet = document.getElementById('vendeur-contact-sujet').value.trim();
+            const message = document.getElementById('vendeur-contact-message').value.trim();
+
+            if (!nomVendeur || !numeroVendeur || !sujet || !message) {
+                alert("Veuillez remplir tous les champs pour contacter le vendeur via WhatsApp.");
+                return;
+            }
+
+            // Format the phone number for WhatsApp (remove spaces, ensure + prefix)
+            let formattedNumber = numeroVendeur.replace(/\s+/g, '');
+            if (!formattedNumber.startsWith('+')) {
+                formattedNumber = '+' + formattedNumber;
+            }
+
+            // Create WhatsApp URL with pre-filled message
+            const whatsappMessage = `Bonjour ${nomVendeur},\n\nSujet: ${sujet}\n\n${message}\n\nCordialement,\nClient Djassa CI`;
+            const whatsappUrl = `https://wa.me/${formattedNumber.replace('+', '')}?text=${encodeURIComponent(whatsappMessage)}`;
+
+            // Open WhatsApp in a new window/tab
+            window.open(whatsappUrl, '_blank');
+
+            // Show confirmation
+            alert(`Ouverture de WhatsApp pour contacter ${nomVendeur} au ${numeroVendeur}.\n\nMessage pré-rempli envoyé.`);
+        }
+
+        function contacterVendeur() {
+            const nomVendeur = document.getElementById('vendeur-contact-nom').value.trim();
+            const numeroVendeur = document.getElementById('vendeur-contact-numero').value.trim();
+            const sujet = document.getElementById('vendeur-contact-sujet').value.trim();
+            const message = document.getElementById('vendeur-contact-message').value.trim();
+
+            if (!nomVendeur || !numeroVendeur || !sujet || !message) {
+                alert("Veuillez remplir tous les champs pour contacter le vendeur.");
+                return;
+            }
+
+            // Simulation d'envoi de message au vendeur
+            const output = document.getElementById('vendeur-contact-output');
+            output.style.display = 'block';
+            output.innerHTML = `
+                <h3>Message envoyé avec succès !</h3>
+                <p><strong>Destinataire:</strong> ${nomVendeur} (${numeroVendeur})</p>
+                <p><strong>Sujet:</strong> ${sujet}</p>
+                <p><strong>Message:</strong> ${message}</p>
+                <p class="success">Votre message a été envoyé au vendeur. Il vous contactera bientôt pour discuter des détails avant le paiement.</p>
+            `;
+
+            // Vider le formulaire
+            document.getElementById('vendeur-contact-nom').value = '';
+            document.getElementById('vendeur-contact-numero').value = '';
+            document.getElementById('vendeur-contact-sujet').value = '';
+            document.getElementById('vendeur-contact-message').value = '';
+
+            // Simulation d'un SMS envoyé au vendeur
+            alert(`Message envoyé au vendeur ${nomVendeur} :\n\n"${message}"\n\n(Simulation - en production, ce message serait envoyé par SMS)`);
+        }
+
+        function envoyerMessage() {
+            const nom = document.getElementById('contact-nom').value.trim();
+            const email = document.getElementById('contact-email').value.trim();
+            const sujet = document.getElementById('contact-sujet').value.trim();
+            const message = document.getElementById('contact-message').value.trim();
+
+            if (!nom || !email || !sujet || !message) {
+                alert("Veuillez remplir tous les champs du formulaire de contact.");
+                return;
+            }
+
+            alert("Votre message a été envoyé avec succès ! Nous vous répondrons bientôt.");
+        }
+
+        async function voirBoutiques() {
+            let output = '<h3>Boutiques Disponibles</h3>';
+            
+            try {
+                // Get all sellers from API
+                const sellers = await window.DjassaAPI.sellers.getAll();
+                
+                if (!sellers || sellers.length === 0) {
+                    output += '<p>Aucune boutique disponible pour le moment.</p>';
+                } else {
+                    output += '<div class="grid">';
+                    for (const vendeur of sellers) {
+                        // Get products for this seller
+                        const articlesVendeur = await window.DjassaAPI.sellers.getSellerProducts(vendeur);
+                        const premierArticle = articlesVendeur && articlesVendeur.length > 0 ? articlesVendeur[0] : null;
+
+                        output += `
+                            <div class="boutique-card" onclick="voirBoutique('${encodeURIComponent(vendeur)}')">
+                                <img src="${premierArticle ? premierArticle.image : 'https://via.placeholder.com/300x200?text=Boutique'}" alt="Boutique ${vendeur}">
+                                <div class="content">
+                                    <h3>${vendeur}</h3>
+                                    <p>${articlesVendeur ? articlesVendeur.length : 0} article${articlesVendeur && articlesVendeur.length > 1 ? 's' : ''} disponible${articlesVendeur && articlesVendeur.length > 1 ? 's' : ''}</p>
+                                    <div class="boutique-meta">
+                                        <small>Localisation: ${premierArticle ? premierArticle.vendeurLocalisation || 'Non spécifiée' : 'Non spécifiée'}</small>
+                                    </div>
+                                    <button onclick="event.stopPropagation(); voirBoutique('${encodeURIComponent(vendeur)}')">Voir la Boutique</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    output += '</div>';
+                }
+            } catch (error) {
+                console.error('Error loading boutiques:', error);
+                output += '<p>Erreur lors du chargement des boutiques. Veuillez réessayer.</p>';
+            }
+
+            document.getElementById('boutiques-content').innerHTML = output;
+        }
+
+        async function voirBoutique(vendeur) {
+            // Decode the vendor name
+            const vendeurDecode = decodeURIComponent(vendeur);
+            
+            let output = '';
+            
+            try {
+                // Get products for this seller from API
+                const articlesVendeur = await window.DjassaAPI.sellers.getSellerProducts(vendeurDecode);
+                
+                output = `
+                    <div class="boutique-info">
+                        <button onclick="voirBoutiques()" class="back-btn">← Retour aux boutiques</button>
+                        <h3>Boutique de ${vendeurDecode}</h3>
+                        <p><strong>Articles disponibles:</strong> ${articlesVendeur ? articlesVendeur.length : 0}</p>
+                        <p><strong>Localisation:</strong> ${articlesVendeur && articlesVendeur[0] ? articlesVendeur[0].vendeurLocalisation || 'Non spécifiée' : 'Non spécifiée'}</p>
+                    </div>
+                    <h3>Articles de cette boutique</h3>
+                    <div class="grid">
+                `;
+
+                if (!articlesVendeur || articlesVendeur.length === 0) {
+                    output += '<p>Aucun article disponible dans cette boutique.</p>';
+                } else {
+                    articlesVendeur.forEach(article => {
+                        output += `
+                            <div class="article-card">
+                                <img src="${article.image}" alt="${article.name}" onclick="voirDetailsArticle(${article.id})" style="cursor: pointer;">
+                                <div class="content">
+                                    <h3 onclick="voirDetailsArticle(${article.id})" style="cursor: pointer;">${article.name}</h3>
+                                    <p>${article.description.substring(0, 100)}${article.description.length > 100 ? '...' : ''}</p>
+                                    <div class="price">${article.price.toLocaleString()} FCFA</div>
+                                    <div class="article-meta">
+                                        <small>Catégorie: ${article.categorie}</small><br>
+                                        <small>Date: ${new Date(article.datePublication).toLocaleDateString('fr-FR')}</small>
+                                    </div>
+                                    <button onclick="ajouterAuPanier(${article.id})">Ajouter au Panier</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                output += '</div>';
+            } catch (error) {
+                console.error('Error loading boutique:', error);
+                output = `
+                    <div class="boutique-info">
+                        <button onclick="voirBoutiques()" class="back-btn">← Retour aux boutiques</button>
+                        <h3>Boutique de ${vendeurDecode}</h3>
+                    </div>
+                    <p>Erreur lors du chargement de la boutique. Veuillez réessayer.</p>
+                `;
+            }
+
+            document.getElementById('boutiques-content').innerHTML = output;
+        }
+
+        function supprimerArticle(articleId) {
+            if (!utilisateurConnecte) {
+                alert("Veuillez vous connecter pour supprimer un article.");
+                return;
+            }
+
+            const article = articlesDisponibles.find(a => a.id === articleId);
+            if (!article) {
+                alert("Article non trouvé.");
+                return;
+            }
+
+            const sellerName = article.vendeurNom || article.vendeur || 'Inconnu';
+            if (utilisateurConnecte.prenom + ' ' + utilisateurConnecte.nom !== sellerName) {
+                alert("Vous ne pouvez supprimer que vos propres articles.");
+                return;
+            }
+
+            const confirmation = confirm(`Êtes-vous sûr de vouloir supprimer l'article "${article.name}" ? Cette action est irréversible.`);
+
+            if (confirmation) {
+                // Remove from available articles
+                articlesDisponibles = articlesDisponibles.filter(a => a.id !== articleId);
+                sauvegarderArticles();
+
+                // Remove from carts if present
+                panier = panier.filter(item => item.id !== articleId);
+                sauvegarderPanier();
+                mettreAJourCompteurPanier();
+
+                alert("Article supprimé avec succès.");
+                voirArticles(currentFilter);
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initialiserDonnees();
+
+            const navLinks = document.querySelectorAll('.navbar a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    showSection(targetId);
+                });
+            });
+
+            // Search functionality
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.addEventListener('input', rechercherArticles);
+            }
+        });
+    </script>
+</body>
+</html>

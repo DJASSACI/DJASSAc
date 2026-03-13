@@ -1,0 +1,130 @@
+[
+  {
+    "id": 1,
+    "nom": "Dupont",
+    "prenom": "Jean",
+    "numero": "jean.dupont@email.com",
+    "address": "123 Rue de Paris, 75001 Paris",
+    "age": 28,
+    "password": "5e884898da28047d9191d751c5ff87c69dda7eb1c64d44b8c3f3e5e5c5c5c5c5",
+    "role": "user",
+    "dateInscription": "2024-01-15T10:30:00.000Z"
+  },
+  {
+    "id": 2,
+    "nom": "Martin",
+    "prenom": "Sophie",
+    "numero": "sophie.martin@email.com",
+    "address": "45 Avenue des Champs-Élysées, 75008 Paris",
+    "age": 32,
+    "password": "5e884898da28047d9191d751c5ff87c69dda7eb1c64d44b8c3f3e5e5c5c5c5c5",
+    "role": "user",
+    "dateInscription": "2024-02-20T14:15:00.000Z"
+  },
+  {
+    "id": 3,
+    "nom": "Bernard",
+    "prenom": "Pierre",
+    "numero": "pierre.bernard@email.com",
+    "address": "78 Boulevard Saint-Germain, 75006 Paris",
+    "age": 45,
+    "password": "5e884898da28047d9191d751c5ff87c69dda7eb1c64d44b8c3f3e5e5c5c5c5c5",
+    "role": "user",
+    "dateInscription": "2024-03-10T09:00:00.000Z"
+  },
+  {
+    "id": 4,
+    "nom": "Dubois",
+    "prenom": "Marie",
+    "numero": "marie.dubois@email.com",
+    "address": "12 Rue de la République, 69002 Lyon",
+    "age": 25,
+    "password": "5e884898da28047d9191d751c5ff87c69dda7eb1c64d44b8c3f3e5e5c5c5c5c5",
+    "role": "user",
+    "dateInscription": "2024-03-25T16:45:00.000Z"
+  },
+  {
+    "id": 5,
+    "nom": "Thomas",
+    "prenom": "Laurent",
+    "numero": "laurent.thomas@email.com",
+    "address": "34 Place Bellecour, 69002 Lyon",
+    "age": 38,
+    "password": "5e884898da28047d9191d751c5ff87c69dda7eb1c64d44b8c3f3e5e5c5c5c5c5",
+    "role": "user",
+    "dateInscription": "2024-04-05T11:20:00.000Z"
+  },
+  {
+    "id": 6,
+    "nom": "Robert",
+    "prenom": "Catherine",
+    "numero": "catherine.robert@email.com",
+    "address": "56 Rue du Commerce, 33000 Bordeaux",
+    "age": 41,
+    "password": "5e884898da28047d9191d751c5ff87c69dda7eb1c64d44b8c3f3e5e5c5c5c5c5",
+    "role": "user",
+    "dateInscription": "2024-04-18T13:30:00.000Z"
+  },
+  {
+    "id": 7,
+    "nom": "Petit",
+    "prenom": "Alain",
+    "numero": "alain.petit@email.com",
+    "address": "89 Avenue de la Mer, 13002 Marseille",
+    "age": 52,
+    "password": "5e884898da28047d9191d751c5ff87c69dda7eb1c64d44b8c3f3e5e5c5c5c5c5",
+    "role": "user",
+    "dateInscription": "2024-05-02T10:00:00.000Z"
+  },
+  {
+    "id": 8,
+    "nom": "Durand",
+    "prenom": "Nathalie",
+    "numero": "nathalie.durand@email.com",
+    "address": "23 Boulevard de la Croisette, 06400 Cannes",
+    "age": 29,
+    "password": "5e884898da28047d9191d751c5ff87c69dda7eb1c64d44b8c3f3e5e5c5c5c5c5",
+    "role": "user",
+    "dateInscription": "2024-05-20T15:10:00.000Z"
+  },
+  {
+    "id": 1771113289147,
+    "nom": "barakat",
+    "prenom": "ganame",
+    "numero": "0777380334",
+    "address": "Cocody Angré, Rue des Palmiers",
+    "password": "ded160d49e90f3f3a3724b585e4e8eee9ecbd363849afb55b7475c181f5e42e7",
+    "role": "user",
+    "dateInscription": "2026-02-14T23:54:49.147Z"
+  },
+  {
+    "id": 1771130181318,
+    "nom": "Test",
+    "prenom": "User",
+    "numero": "+22501234567",
+    "address": "Abidjan",
+    "password": "ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae",
+    "role": "user",
+    "dateInscription": "2026-02-15T04:36:21.319Z"
+  },
+  {
+    "id": 1771172488551,
+    "nom": "Dupont",
+    "prenom": "Jean",
+    "numero": "+22509999999",
+    "address": "Abidjan",
+    "password": "password123",
+    "role": "user",
+    "dateInscription": "2026-02-15T16:21:28.551Z"
+  },
+  {
+    "id": 1771277570062,
+    "nom": "barakat",
+    "prenom": "ganame",
+    "numero": "+2250777385105",
+    "address": "Cocody Angré, Rue des Palmiers",
+    "password": "MAWA BB",
+    "role": "user",
+    "dateInscription": "2026-02-16T21:32:50.062Z"
+  }
+]
